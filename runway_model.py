@@ -22,7 +22,6 @@ from PIL import Image
 import io
 
 
-
 STD_SIZE = 120
 
 mode = 'cpu'
@@ -86,18 +85,6 @@ def classify(model, inputs):
     else:
         rects = []
 
-    """
-    if len(rects) == 0:
-        rects = dlib.rectangles()
-        print(img_fp)
-        rect_fp = img_fp + '.bbox'
-        lines = open(rect_fp).read().strip().split('\n')[1:]
-        for l in lines:
-            l, r, t, b = [int(_) for _ in l.split(' ')[1:]]
-            rect = dlib.rectangle(l, r, t, b)
-            rects.append(rect)
-    """
-
     pts_res = []
     Ps = []  # Camera matrix collection
     poses = []  # pose collection, [todo: validate it]
@@ -158,31 +145,6 @@ def classify(model, inputs):
         if dump_ply or dump_vertex or dump_depth or dump_pncc or dump_obj:
             vertices = predict_dense(param, roi_box)
             vertices_lst.append(vertices)
-        if dump_ply:
-            dump_to_ply(vertices, tri, '{}_{}.ply'.format(img_fp.replace(suffix, ''), ind))
-        if dump_vertex:
-            dump_vertex(vertices, '{}_{}.mat'.format(img_fp.replace(suffix, ''), ind))
-        if dump_pts:
-            wfp = '{}_{}.txt'.format(img_fp.replace(suffix, ''), ind)
-            np.savetxt(wfp, pts68, fmt='%.3f')
-            #print('Save 68 3d landmarks to {}'.format(wfp))
-        if dump_roi_box:
-            wfp = '{}_{}.roibox'.format(img_fp.replace(suffix, ''), ind)
-            np.savetxt(wfp, roi_box, fmt='%.3f')
-            #print('Save roi box to {}'.format(wfp))
-        if dump_paf:
-            wfp_paf = '{}_{}_paf.jpg'.format(img_fp.replace(suffix, ''), ind)
-            wfp_crop = '{}_{}_crop.jpg'.format(img_fp.replace(suffix, ''), ind)
-            paf_feature = gen_img_paf(img_crop=img, param=param, kernel_size=paf_size)
-
-            cv2.imwrite(wfp_paf, paf_feature)
-            cv2.imwrite(wfp_crop, img)
-            #print('Dump to {} and {}'.format(wfp_crop, wfp_paf))
-        if dump_obj:
-            wfp = '{}_{}.obj'.format(img_fp.replace(suffix, ''), ind)
-            colors = get_colors(img_ori, vertices)
-            write_obj_with_colors(wfp, vertices, tri, colors)
-            #print('Dump obj with sampled texture to {}'.format(wfp))
         ind += 1
         
 
@@ -191,33 +153,7 @@ def classify(model, inputs):
     print(type(output))
     print("this is the output XXXXXXXXXXXXXXXXXXXXX")
     pilImg = transforms.ToPILImage()(np.uint8(output))
-    print(pilImg)
-    pilImg.save("numpy_altered_sample2.png")
-    
 
-    """
-    if dump_pose:
-        # P, pose = parse_pose(param)  # Camera matrix (without scale), and pose (yaw, pitch, roll, to verify)
-        img_pose = plot_pose_box(img_ori, Ps, pts_res)
-        wfp = img_fp.replace(suffix, '_pose.jpg')
-        cv2.imwrite(wfp, img_pose)
-        print('Dump to {}'.format(wfp))
-    if dump_depth:
-        wfp = img_fp.replace(suffix, '_depth.png')
-        # depths_img = get_depths_image(img_ori, vertices_lst, tri-1)  # python version
-        depths_img = cget_depths_image(img_ori, vertices_lst, tri - 1)  # cython version
-        cv2.imwrite(wfp, depths_img)
-        print('Dump to {}'.format(wfp))
-    if dump_pncc:
-        wfp = img_fp.replace(suffix, '_pncc.png')
-        pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)  # cython version
-        
-        cv2.imwrite(wfp, pncc_feature[:, :, ::-1])  # cv2.imwrite will swap RGB -> BGR
-        print('Dump to {}'.format(wfp))
-    if dump_res:
-        draw_landmarks(img_ori, pts_res, wfp=img_fp.replace(suffix, '_3DDFA.jpg'), show_flg=show_flg)
-    """
-    
     return { "image": pilImg } 
 
 
