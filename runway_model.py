@@ -71,14 +71,10 @@ def setup():
 
 
 
-@runway.command('classify', inputs={'photo': image}, outputs={'label': text})
+@runway.command('classify', inputs={'photo': image}, outputs={'image': image})
 def classify(model, inputs):
     in_img = inputs['photo']
-    print(in_img)
     img_ori = np.array(in_img)
-    print(img_ori)
-    #img_ori = cv2.imread(in_img)
-    #in_img
     img_fp = 'samples/test1.jpg'
 
     # 2. load dlib model for face detection and landmark used for face cropping
@@ -132,10 +128,10 @@ def classify(model, inputs):
         model_input = transform(img).unsqueeze(0)
         print(model_input)
         with torch.no_grad():
-            """
+            
             if mode == 'gpu':
                 input = input.cuda()
-            """
+
             param = model(model_input)
             param = param.squeeze().cpu().numpy().flatten().astype(np.float32)
 
@@ -162,6 +158,7 @@ def classify(model, inputs):
         Ps.append(P)
         poses.append(pose)
 
+        """
         # dense face 3d vertices
         if dump_ply or dump_vertex or dump_depth or dump_pncc or dump_obj:
             vertices = predict_dense(param, roi_box)
@@ -192,7 +189,14 @@ def classify(model, inputs):
             write_obj_with_colors(wfp, vertices, tri, colors)
             print('Dump obj with sampled texture to {}'.format(wfp))
         ind += 1
+        """
 
+    pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)
+    output = pncc_feature[:, :, ::-1]
+    img = Image.fromarray(output, 'RGB')
+    
+
+    """
     if dump_pose:
         # P, pose = parse_pose(param)  # Camera matrix (without scale), and pose (yaw, pitch, roll, to verify)
         img_pose = plot_pose_box(img_ori, Ps, pts_res)
@@ -208,12 +212,14 @@ def classify(model, inputs):
     if dump_pncc:
         wfp = img_fp.replace(suffix, '_pncc.png')
         pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)  # cython version
+        
         cv2.imwrite(wfp, pncc_feature[:, :, ::-1])  # cv2.imwrite will swap RGB -> BGR
         print('Dump to {}'.format(wfp))
     if dump_res:
         draw_landmarks(img_ori, pts_res, wfp=img_fp.replace(suffix, '_3DDFA.jpg'), show_flg=show_flg)
+    """
     
-    return "hello"
+    return { "image": img } 
 
 
 if __name__ == '__main__':
