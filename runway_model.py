@@ -89,12 +89,13 @@ def classify(model, inputs):
     # 3. forward
     tri = sio.loadmat('visualize/tri.mat')['tri']
     transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
-    print(transform)
+    #print(transform)
     if dlib_bbox:
         rects = face_detector(img_ori, 1)
     else:
         rects = []
 
+    """
     if len(rects) == 0:
         rects = dlib.rectangles()
         print(img_fp)
@@ -104,6 +105,7 @@ def classify(model, inputs):
             l, r, t, b = [int(_) for _ in l.split(' ')[1:]]
             rect = dlib.rectangle(l, r, t, b)
             rects.append(rect)
+    """
 
     pts_res = []
     Ps = []  # Camera matrix collection
@@ -160,7 +162,7 @@ def classify(model, inputs):
         Ps.append(P)
         poses.append(pose)
 
-        """
+    
         # dense face 3d vertices
         if dump_ply or dump_vertex or dump_depth or dump_pncc or dump_obj:
             vertices = predict_dense(param, roi_box)
@@ -172,11 +174,11 @@ def classify(model, inputs):
         if dump_pts:
             wfp = '{}_{}.txt'.format(img_fp.replace(suffix, ''), ind)
             np.savetxt(wfp, pts68, fmt='%.3f')
-            print('Save 68 3d landmarks to {}'.format(wfp))
+            #print('Save 68 3d landmarks to {}'.format(wfp))
         if dump_roi_box:
             wfp = '{}_{}.roibox'.format(img_fp.replace(suffix, ''), ind)
             np.savetxt(wfp, roi_box, fmt='%.3f')
-            print('Save roi box to {}'.format(wfp))
+            #print('Save roi box to {}'.format(wfp))
         if dump_paf:
             wfp_paf = '{}_{}_paf.jpg'.format(img_fp.replace(suffix, ''), ind)
             wfp_crop = '{}_{}_crop.jpg'.format(img_fp.replace(suffix, ''), ind)
@@ -184,18 +186,22 @@ def classify(model, inputs):
 
             cv2.imwrite(wfp_paf, paf_feature)
             cv2.imwrite(wfp_crop, img)
-            print('Dump to {} and {}'.format(wfp_crop, wfp_paf))
+            #print('Dump to {} and {}'.format(wfp_crop, wfp_paf))
         if dump_obj:
             wfp = '{}_{}.obj'.format(img_fp.replace(suffix, ''), ind)
             colors = get_colors(img_ori, vertices)
             write_obj_with_colors(wfp, vertices, tri, colors)
-            print('Dump obj with sampled texture to {}'.format(wfp))
+            #print('Dump obj with sampled texture to {}'.format(wfp))
         ind += 1
-        """
+        
 
     pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)
     output = pncc_feature[:, :, ::-1]
-    img = Image.fromarray(output, 'RGB')
+    print(type(output))
+    print("this is the output XXXXXXXXXXXXXXXXXXXXX")
+    pilImg = transforms.ToPILImage()(np.uint8(output))
+    print(pilImg)
+    pilImg.save("numpy_altered_sample2.png")
     
 
     """
@@ -221,7 +227,7 @@ def classify(model, inputs):
         draw_landmarks(img_ori, pts_res, wfp=img_fp.replace(suffix, '_3DDFA.jpg'), show_flg=show_flg)
     """
     
-    return { "image": img } 
+    return { "image": pilImg } 
 
 
 if __name__ == '__main__':
