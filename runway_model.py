@@ -28,12 +28,13 @@ from utils.paf import gen_img_paf
 import argparse
 import torch.backends.cudnn as cudnn
 from PIL import Image
+import io
 
 STD_SIZE = 120
 
-mode = 'gpu'
+mode = 'cpu'
 dlib_landmark = True
-dlib_bbox = False #changed
+dlib_bbox = True #changed
 dump_obj = True
 paf_size = 3
 dump_paf = False
@@ -66,7 +67,7 @@ def setup():
     if mode == 'gpu':
         cudnn.benchmark = True
         model = model.cuda()
-    model.eval()
+    return model.eval()
 
 
 
@@ -75,7 +76,10 @@ def classify(model, inputs):
     in_img = inputs['photo']
     print(in_img)
     img_ori = np.array(in_img)
-    img_fp = cv2.imwrite('samples/test1.jpg', img )
+    print(img_ori)
+    #img_ori = cv2.imread(in_img)
+    #in_img
+    img_fp = 'samples/test1.jpg'
 
     # 2. load dlib model for face detection and landmark used for face cropping
     if dlib_landmark:
@@ -87,6 +91,7 @@ def classify(model, inputs):
     # 3. forward
     tri = sio.loadmat('visualize/tri.mat')['tri']
     transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
+    print(transform)
     if dlib_bbox:
         rects = face_detector(img_ori, 1)
     else:
@@ -124,12 +129,16 @@ def classify(model, inputs):
 
         # forward: one step
         img = cv2.resize(img, dsize=(STD_SIZE, STD_SIZE), interpolation=cv2.INTER_LINEAR)
-        input = transform(img).unsqueeze(0)
+        model_input = transform(img).unsqueeze(0)
+        print(model_input)
         with torch.no_grad():
+            """
             if mode == 'gpu':
                 input = input.cuda()
-            param = model(input)
+            """
+            param = model(model_input)
             param = param.squeeze().cpu().numpy().flatten().astype(np.float32)
+
 
         # 68 pts
         pts68 = predict_68pts(param, roi_box)
