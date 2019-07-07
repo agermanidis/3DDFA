@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 # coding: utf-8
-
-__author__ = 'cleardusk'
-
-"""
-The pipeline of 3DDFA prediction: given one image, predict the 3d face vertices, 68 landmarks and visualization.
-
-[todo]
-1. CPU optimization: https://pmchojnacki.wordpress.com/2018/10/07/slow-pytorch-cpu-performance
-"""
 import runway
 from runway.data_types import number, text, image
 import torch
