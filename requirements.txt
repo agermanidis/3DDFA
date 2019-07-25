@@ -1,6 +1,6 @@
 runway-python
-torch>=0.4.1
-torchvision>=0.2.1
+torch==1.1.0
+torchvision==0.3.0
 numpy>=1.15.4
 scipy>=1.1.0
 matplotlib==3.0.2
