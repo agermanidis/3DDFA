@@ -46,7 +46,7 @@ add run options for face points, pose estimation (reconstruction?)
 """
 
 
-@runway.setup(options={'checkpoint': runway.file(extension=.tar)})
+@runway.setup(options={'checkpoint': runway.file(extension='.tar')})
 def setup(opts):
     # 1. load pre-tained model
     checkpoint_fp = opts['checkpoint']
