@@ -42,6 +42,7 @@ bbox_init = 'one'
 show_flg = True
 
 
+
 @runway.setup
 def setup():
     # 1. load pre-tained model
