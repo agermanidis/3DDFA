@@ -24,7 +24,7 @@ import io
 
 STD_SIZE = 120
 
-mode = 'cpu'
+mode = 'gpu'
 dlib_landmark = True
 dlib_bbox = True #changed
 dump_obj = True
