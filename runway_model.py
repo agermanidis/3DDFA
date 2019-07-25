@@ -41,6 +41,9 @@ dump_res = True
 bbox_init = 'one'
 show_flg = True
 
+"""
+add run options for face points, pose estimation (reconstruction?)
+"""
 
 
 @runway.setup(options={'checkpoint': runway.file(extension=.tar)})
@@ -152,7 +155,6 @@ def classify(model, inputs):
     pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)
     output = pncc_feature[:, :, ::-1]
     print(type(output))
-    print("this is the output XXXXXXXXXXXXXXXXXXXXX")
     pilImg = transforms.ToPILImage()(np.uint8(output))
 
     return { "image": pilImg } 
