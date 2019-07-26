@@ -73,21 +73,14 @@ def classify(model, inputs):
     img_ori = np.array(in_img)
     img_fp = 'samples/test1.jpg'
 
-    # 2. load dlib model for face detection and landmark used for face cropping
-    if dlib_landmark:
-        dlib_landmark_model = 'models/shape_predictor_68_face_landmarks.dat'
-        face_regressor = dlib.shape_predictor(dlib_landmark_model)
-    if dlib_bbox:
-        face_detector = dlib.get_frontal_face_detector()
+
+    face_detector = dlib.get_frontal_face_detector()
 
     # 3. forward
     tri = sio.loadmat('visualize/tri.mat')['tri']
     transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
     #print(transform)
-    if dlib_bbox:
-        rects = face_detector(img_ori, 1)
-    else:
-        rects = []
+    rects = face_detector(img_ori, 1)
 
     pts_res = []
     Ps = []  # Camera matrix collection
@@ -96,16 +89,9 @@ def classify(model, inputs):
     ind = 0
     suffix = get_suffix(img_fp)
     for rect in rects:
-        # whether use dlib landmark to crop image, if not, use only face bbox to calc roi bbox for cropping
-        if dlib_landmark:
-            # - use landmark for cropping
-            pts = face_regressor(img_ori, rect).parts()
-            pts = np.array([[pt.x, pt.y] for pt in pts]).T
-            roi_box = parse_roi_box_from_landmark(pts)
-        else:
-            # - use detected face bbox
-            bbox = [rect.left(), rect.top(), rect.right(), rect.bottom()]
-            roi_box = parse_roi_box_from_bbox(bbox)
+        # - use detected face bbox
+        bbox = [rect.left(), rect.top(), rect.right(), rect.bottom()]
+        roi_box = parse_roi_box_from_bbox(bbox)
 
         img = crop_img(img_ori, roi_box)
 
@@ -145,10 +131,8 @@ def classify(model, inputs):
         poses.append(pose)
 
     
-        # dense face 3d vertices
-        if dump_ply or dump_vertex or dump_depth or dump_pncc or dump_obj:
-            vertices = predict_dense(param, roi_box)
-            vertices_lst.append(vertices)
+        vertices = predict_dense(param, roi_box)
+        vertices_lst.append(vertices)
         ind += 1
         
 
