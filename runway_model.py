@@ -46,10 +46,10 @@ add run options for face points, pose estimation (reconstruction?)
 """
 
 
-@runway.setup
+@runway.setup(options={'checkpoint': runway.file(extension='.tar')})
 def setup(opts):
     # 1. load pre-tained model
-    checkpoint_fp = 'models/phase1_wpdc_vdc.pth.tar'
+    checkpoint_fp = opts['checkpoint']
     arch = 'mobilenet_1'
 
     checkpoint = torch.load(checkpoint_fp, map_location=lambda storage, loc: storage)['state_dict']
